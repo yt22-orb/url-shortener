@@ -36,13 +36,13 @@ jobs:
           python-version: 3.11
 
       - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        # This tells the runner to look inside your subfolder
+        working-directory: ./url-shortener 
+        run: pip install -r requirements.txt
 
       - name: Run tests
-        # Added 'v' for more detail on why it's failing
-        run: pytest -v 
+        working-directory: ./url-shortener
+        run: pytest
 
   docker:
     runs-on: ubuntu-latest
