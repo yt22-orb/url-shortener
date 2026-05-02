@@ -16,5 +16,4 @@ def shorten_url(url: schemas.URLCreate, session: Session = Depends(db.get_db)):
 @app.get("/{short_id}")
 def redirect_url(short_id: int, session: Session = Depends(db.get_db)):
     url = session.query(models.URL).filter(models.URL.id == short_id).first()
-    
     return {"original_url": url.original}
