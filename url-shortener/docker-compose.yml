@@ -3,18 +3,27 @@ version: "3.9"
 services:
   db:
     image: postgres:15
+    container_name: url_shortener_db
+    restart: always
     environment:
-      POSTGRES_USER:user
-      POSTGRES_PASSWORD:password
-      POSTGRES_DB:urls
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: urls
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
   app:
     build: .
+    container_name: url_shortener_app
     depends_on:
-      -db
+      - db
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/urls
+      DATABASE_URL: postgresql://user:password@db:5432/urls
     ports:
       - "8000:8000"
-      
+    restart: always
+
+volumes:
+  db_data:
