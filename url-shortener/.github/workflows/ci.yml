@@ -6,10 +6,10 @@ on:
   pull_request:
 
 env:
-  DATABASE_URL: postgres://user:password@localhost:5432/urls
-  # Fixes the deprecation warning in image_bec540.jpg
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
-
+  # 1. Use the correct SQLAlchemy protocol
+  DATABASE_URL: postgresql://user:password@localhost:5432/urls
+  # 2. Clear the Node.js 20 warning from image_be6f46.png
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -50,11 +50,15 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+      
+      # 3. Build the image so it actually exists before tagging/pushing
+      - name: Build Docker image
+        run: docker build -t url-shortener:latest .
 
-      - name: Build and Push
-        # Using the official action is more reliable than manual docker commands
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --with-token
+
+      - name: Push image
+        run: |
+          docker tag url-shortener:latest ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
